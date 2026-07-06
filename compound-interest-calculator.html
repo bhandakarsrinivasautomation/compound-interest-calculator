@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compounding Value Calculator</title>
+<style>
+  :root {
+    --bg-1: #0f172a;
+    --bg-2: #1e293b;
+    --card: #ffffff;
+    --accent-1: #6366f1;
+    --accent-2: #06b6d4;
+    --accent-3: #f59e0b;
+    --accent-4: #10b981;
+    --accent-5: #ec4899;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 45%, #f093fb 100%);
+    min-height: 100vh;
+    padding: 24px;
+    color: var(--text-dark);
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 28px;
+  }
+
+  header h1 {
+    font-size: 2.2rem;
+    margin: 0 0 6px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 22px;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  }
+
+  .card h2 {
+    margin-top: 0;
+    font-size: 1.15rem;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .field input[type="number"],
+  .field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: #f8fafc;
+    color: var(--text-dark);
+    transition: border-color 0.15s ease;
+  }
+
+  .field input[type="number"]:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--accent-1);
+    background: #fff;
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(99,102,241,0.4);
+    transition: transform 0.1s ease;
+  }
+
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  @media (max-width: 700px) {
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stat {
+    border-radius: 14px;
+    padding: 18px 16px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat .label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.9;
+    margin-bottom: 6px;
+  }
+
+  .stat .value {
+    font-size: 1.35rem;
+    font-weight: 800;
+  }
+
+  .stat.s1 { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+  .stat.s2 { background: linear-gradient(135deg, #10b981, #059669); }
+  .stat.s3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .stat.s4 { background: linear-gradient(135deg, #ec4899, #db2777); }
+
+  .chart-wrap {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 22px;
+  }
+
+  .chart-wrap h3 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
+
+  #chartCanvas {
+    width: 100%;
+    height: 340px;
+    display: block;
+  }
+
+  .table-wrap {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 16px;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+
+  .table-wrap h3 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #1e293b;
+    color: #fff;
+    padding: 10px 8px;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  thead th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+  thead th:last-child { border-radius: 0 8px 0 0; }
+
+  tbody td {
+    padding: 8px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dark);
+  }
+
+  tbody td:first-child { text-align: left; font-weight: 600; color: var(--accent-1); }
+
+  tbody tr:nth-child(even) { background: #eef2ff; }
+  tbody tr:hover { background: #e0e7ff; }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .legend .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .placeholder {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 60px 20px;
+    font-size: 0.95rem;
+  }
+
+  footer {
+    text-align: center;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.8rem;
+    margin-top: 26px;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>💰 Compounding Value Calculator</h1>
+    <p>Plan your investment growth with regular contributions and compound interest</p>
+  </header>
+
+  <div class="layout">
+    <div class="card">
+      <h2>📝 Your Inputs</h2>
+
+      <div class="field">
+        <label for="initial">Initial Investment (₹)</label>
+        <input type="number" id="initial" value="1000000" min="0" step="1000">
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="contribution">Contribution Amount (₹)</label>
+          <input type="number" id="contribution" value="10000" min="0" step="500">
+        </div>
+        <div class="field">
+          <label for="contribFreq">Contribution Frequency</label>
+          <select id="contribFreq">
+            <option value="1">Monthly</option>
+            <option value="3">Quarterly</option>
+            <option value="12" selected>Yearly</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="rate">Annual Interest Rate (%)</label>
+          <input type="number" id="rate" value="8" min="0" step="0.1">
+        </div>
+        <div class="field">
+          <label for="compFreq">Compounding Period</label>
+          <select id="compFreq">
+            <option value="12" selected>Yearly</option>
+            <option value="6">Half-Yearly</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="years">Investment Duration (years)</label>
+        <input type="number" id="years" value="20" min="1" step="1">
+        <div class="hint">Try 10, 20 or 30 years to compare outcomes</div>
+      </div>
+
+      <button class="btn" onclick="calculate()">Calculate Compounding Value</button>
+    </div>
+
+    <div class="card" id="resultsCard">
+      <div class="placeholder">
+        👆 Fill in your details and click <b>Calculate Compounding Value</b> to see your results, growth chart and year-by-year breakdown.
+      </div>
+    </div>
+  </div>
+
+  <footer>Estimates only. Actual returns depend on real market/bank conditions.</footer>
+</div>
+
+<script>
+function formatINR(num) {
+  num = Math.round(num);
+  const isNeg = num < 0;
+  num = Math.abs(num);
+  let str = num.toString();
+  let lastThree = str.substring(str.length - 3);
+  let other = str.substring(0, str.length - 3);
+  if (other !== '') {
+    lastThree = ',' + lastThree;
+  }
+  let formatted = other.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
+  return (isNeg ? '-₹' : '₹') + formatted;
+}
+
+function simulate(initial, contribution, contribFreqMonths, annualRatePct, compFreqMonths, years) {
+  const totalMonths = years * 12;
+  const rate = annualRatePct / 100;
+  const periodsPerYear = 12 / compFreqMonths;
+  const ratePerPeriod = rate / periodsPerYear;
+
+  let balance = initial;
+  let totalContributed = initial;
+  const yearlyRows = [];
+
+  for (let month = 1; month <= totalMonths; month++) {
+    if (month % contribFreqMonths === 0) {
+      balance += contribution;
+      totalContributed += contribution;
+    }
+    if (month % compFreqMonths === 0) {
+      balance += balance * ratePerPeriod;
+    }
+    if (month % 12 === 0) {
+      const yearNum = month / 12;
+      yearlyRows.push({
+        year: yearNum,
+        contributed: totalContributed,
+        balance: balance,
+        interestSoFar: balance - totalContributed
+      });
+    }
+  }
+
+  return {
+    finalBalance: balance,
+    totalContributed: totalContributed,
+    totalInterest: balance - totalContributed,
+    yearlyRows: yearlyRows
+  };
+}
+
+function drawChart(canvas, rows) {
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = canvas.clientWidth;
+  const cssHeight = canvas.clientHeight;
+  canvas.width = cssWidth * dpr;
+  canvas.height = cssHeight * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+  const padding = { top: 20, right: 20, bottom: 36, left: 70 };
+  const w = cssWidth - padding.left - padding.right;
+  const h = cssHeight - padding.top - padding.bottom;
+
+  const maxVal = Math.max(...rows.map(r => r.balance)) * 1.08;
+  const n = rows.length;
+
+  function xFor(i) { return padding.left + (i / (n - 1 || 1)) * w; }
+  function yFor(v) { return padding.top + h - (v / maxVal) * h; }
+
+  // Gridlines + Y labels
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.fillStyle = '#64748b';
+  ctx.font = '11px Segoe UI';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  const gridSteps = 5;
+  for (let g = 0; g <= gridSteps; g++) {
+    const val = (maxVal / gridSteps) * g;
+    const y = yFor(val);
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(padding.left + w, y);
+    ctx.stroke();
+    ctx.fillText(formatINR(val), padding.left - 8, y);
+  }
+
+  // X labels (years) - show subset if too many
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const step = Math.ceil(n / 10);
+  for (let i = 0; i < n; i += step) {
+    ctx.fillText('Y' + rows[i].year, xFor(i), padding.top + h + 8);
+  }
+
+  // Area under balance line
+  ctx.beginPath();
+  ctx.moveTo(xFor(0), yFor(0));
+  rows.forEach((r, i) => ctx.lineTo(xFor(i), yFor(r.balance)));
+  ctx.lineTo(xFor(n - 1), yFor(0));
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, padding.top, 0, padding.top + h);
+  grad.addColorStop(0, 'rgba(99,102,241,0.35)');
+  grad.addColorStop(1, 'rgba(99,102,241,0.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Contributed line
+  ctx.beginPath();
+  rows.forEach((r, i) => {
+    const x = xFor(i), y = yFor(r.contributed);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([6, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Balance line
+  ctx.beginPath();
+  rows.forEach((r, i) => {
+    const x = xFor(i), y = yFor(r.balance);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#4f46e5';
+  ctx.lineWidth = 3;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Points on balance line
+  ctx.fillStyle = '#4f46e5';
+  rows.forEach((r, i) => {
+    ctx.beginPath();
+    ctx.arc(xFor(i), yFor(r.balance), 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function calculate() {
+  const initial = parseFloat(document.getElementById('initial').value) || 0;
+  const contribution = parseFloat(document.getElementById('contribution').value) || 0;
+  const contribFreq = parseInt(document.getElementById('contribFreq').value);
+  const rate = parseFloat(document.getElementById('rate').value) || 0;
+  const compFreq = parseInt(document.getElementById('compFreq').value);
+  const years = parseInt(document.getElementById('years').value) || 0;
+
+  if (years <= 0) {
+    alert('Please enter a valid number of years (1 or more).');
+    return;
+  }
+
+  const result = simulate(initial, contribution, contribFreq, rate, compFreq, years);
+
+  const contribLabel = contribFreq === 1 ? 'Monthly' : (contribFreq === 3 ? 'Quarterly' : 'Yearly');
+  const compLabel = compFreq === 12 ? 'Yearly' : 'Half-Yearly';
+
+  let tableRows = '';
+  result.yearlyRows.forEach(r => {
+    tableRows += `<tr>
+      <td>Year ${r.year}</td>
+      <td>${formatINR(r.contributed)}</td>
+      <td>${formatINR(r.interestSoFar)}</td>
+      <td>${formatINR(r.balance)}</td>
+    </tr>`;
+  });
+
+  const html = `
+    <h2>📊 Results (${contribLabel} contribution, ${compLabel} compounding, ${years} years)</h2>
+    <div class="summary-grid">
+      <div class="stat s1">
+        <div class="label">Final Value</div>
+        <div class="value">${formatINR(result.finalBalance)}</div>
+      </div>
+      <div class="stat s3">
+        <div class="label">Total Invested</div>
+        <div class="value">${formatINR(result.totalContributed)}</div>
+      </div>
+      <div class="stat s2">
+        <div class="label">Total Interest Earned</div>
+        <div class="value">${formatINR(result.totalInterest)}</div>
+      </div>
+      <div class="stat s4">
+        <div class="label">Wealth Gain Multiple</div>
+        <div class="value">${(result.finalBalance / result.totalContributed).toFixed(2)}x</div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <h3>📈 Growth Over Time</h3>
+      <div class="legend">
+        <span><span class="dot" style="background:#4f46e5"></span> Total Balance (with interest)</span>
+        <span><span class="dot" style="background:#f59e0b"></span> Total Contributed (no interest)</span>
+      </div>
+      <canvas id="chartCanvas"></canvas>
+    </div>
+
+    <div class="table-wrap">
+      <h3>📋 Year-by-Year Breakdown</h3>
+      <table>
+        <thead>
+          <tr><th>Year</th><th>Total Contributed</th><th>Interest Earned</th><th>Balance</th></tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById('resultsCard').innerHTML = html;
+  const canvas = document.getElementById('chartCanvas');
+  drawChart(canvas, result.yearlyRows);
+
+  window.addEventListener('resize', () => drawChart(canvas, result.yearlyRows), { once: false });
+}
+
+calculate();
+</script>
+</body>
+</html>
